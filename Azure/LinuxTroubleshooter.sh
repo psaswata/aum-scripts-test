@@ -1,3 +1,10 @@
+timestamp() {
+    date +"%T"
+}
+scriptName="/root/$(timestamp).py"
+urlRegex="'https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]'"
+
+echo '
 #!/usr/bin/env python
 from __future__ import print_function
 import os
@@ -106,7 +113,7 @@ class LinuxDistribution(object):
 
     This package creates a private module-global instance of this class with
     default initialization arguments, that is used by the
-    
+
     By using default initialization arguments, that module-global instance
     returns data about the current OS distribution (i.e. the distro this
     package runs on).
@@ -537,7 +544,7 @@ class LinuxDistribution(object):
                 # containing on top of their own.
                 basenames.sort()
             except OSError:
-                
+
                 basenames = ["SuSE-release",
                              "arch-release",
                              "base-release",
@@ -691,12 +698,12 @@ class Utility(object):
             return 0, None
         else:
            return 0, self.get_subprocess_output_as_asciistring(output)
-    
+
 
     def get_subprocess_output_as_asciistring(self, subprocess_output):
         if subprocess_output is None:
             return None
-        
+
         # python 3
         if sys.version_info[0] >= 3:
             return subprocess_output.decode("ascii", "ignore")
@@ -759,7 +766,7 @@ class RepositoryManager:
         global CheckResultMessage_RepoCheck
         global CheckResultMessageArguments_RepoCheck
         osInQuestion = get_os_type()
-        
+
         repoUriList = self.getConfiguredRepos(osInQuestion)
         self.appendToLogs("repo URI List", status_debug)
         if repoUriList is None:
@@ -773,7 +780,7 @@ class RepositoryManager:
     def getConfiguredRepos(self, osType):
         #support for rhel, ubuntu, suse, centos
         if osType == OSType.Ubuntu:
-            repoList = self.getConfiguredReposForUbuntu_Debian() 
+            repoList = self.getConfiguredReposForUbuntu_Debian()
         elif osType == OSType.Suse:
             repoList = self.getConfiguredReposForSuse()
         elif osType == OSType.Redhat:
@@ -781,7 +788,7 @@ class RepositoryManager:
         elif osType == OSType.CentOs:
             repoList = self.getConfiguredReposForCentos_Rocky_Oracle()
         elif osType == OSType.Debian:
-            repoList = self.getConfiguredReposForUbuntu_Debian() 
+            repoList = self.getConfiguredReposForUbuntu_Debian()
         elif osType == OSType.Amazon:
             repoList = self.getConfiguredReposForRhel_Amazon()
         elif osType == OSType.Rocky:
@@ -813,7 +820,7 @@ class RepositoryManager:
         (out, err) = self.executeCommand(unixCmd)
 
         if err != "":
-            self.appendToLogs("Error while extracting repositories configured in package manager yum/apt/zypper -- " + err, status_debug)            
+            self.appendToLogs("Error while extracting repositories configured in package manager yum/apt/zypper -- " + err, status_debug)
             return None
 
         repoList = []
@@ -831,7 +838,7 @@ class RepositoryManager:
         (out, err) = self.executeCommand(unixCmd)
 
         if err != "":
-            self.appendToLogs("Error while extracting repositories configured in package manager yum/apt/zypper -- " + err, status_debug)            
+            self.appendToLogs("Error while extracting repositories configured in package manager yum/apt/zypper -- " + err, status_debug)
             return None
 
         repoList = []
@@ -849,7 +856,7 @@ class RepositoryManager:
         if os.path.isfile(repoFile) is False:
             self.appendToLogs("Error - Repo File /etc/apt/sources.list not present", status_debug)
             return None
-        
+
         unixCmd = "grep -Erh ^deb /etc/apt/sources.list*"
 
         (out, err) = self.executeCommand(unixCmd)
@@ -962,7 +969,7 @@ class RepositoryManager:
                         if path[0] == "":  #case of uri "/google.com/path/to"
                             if path[1] != "":
                                 currentNetLoc = path[1]
-                        else:              #case of uri "google.com/path/to" 
+                        else:              #case of uri "google.com/path/to"
                             currentNetLoc = path[0]
             else:
                 currentNetLoc = parsed.netloc   # got netloc
@@ -973,14 +980,14 @@ class RepositoryManager:
                 netLocList.append(currentNetLoc)
 
         netLocList = list(set(netLocList))
-        return netLocList  
+        return netLocList
 
 def check_access_to_linux_repos():
-    
+
     global CheckResultMessageArguments_RepoCheck
     global CheckResultMessage_RepoCheck
     rule_id = "Linux.ReposAccessCheck"
-    rule_group_id = "machineSettings"
+    rule_group_id = "connectivity"
     rule_name = "Repository Access Check"
 
     repoMgr = RepositoryManager()
@@ -1004,7 +1011,7 @@ def main(output_path=None, return_json_output="False"):
     else:
         print("Running as root")
         write_log_output("Linux.SudoCheck","prerequisites",status_passed,empty_failure_reason,"Running as root")
-    
+
     # supported python version greter than 2.7.x
     rule_id_python = "Linux.PythonVersionCheck"
     rule_group_id_python = "prerequisites"
@@ -1045,7 +1052,7 @@ def main(output_path=None, return_json_output="False"):
                 os.makedirs(output_path)
             except OSError:
                 if not os.path.isdir(output_path):
-                    raise 
+                    raise
             log_path = "%s/healthcheck-%s.log" % (output_path, datetime.datetime.utcnow().isoformat())
             f = open(log_path, "w")
             f.write("".join(output))
@@ -1090,7 +1097,7 @@ def check_os_version():
     os_tuple = utils.get_linux_distribution()
     os_version = os_tuple[0] + "-" + os_tuple[1]
     supported_os_url = "https://learn.microsoft.com/en-us/azure/update-manager/support-matrix?tabs=public%2Cazurearc-os"
-    
+
     if re.search("Ubuntu-22.04 LTS", os_version, re.IGNORECASE) or \
        re.search("Ubuntu-20.04", os_version, re.IGNORECASE) or \
        re.search("Ubuntu-16.04", os_version, re.IGNORECASE) or \
@@ -1115,10 +1122,10 @@ def check_os_version():
     else:
         log_msg = "Operating System version (%s) is not supported. Supported versions listed here: %s" % (os_version, supported_os_url)
         write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, log_msg, supported_os_url)
- 
+
 def check_proxy_connectivity():
     rule_id = "Linux.ProxyCheck"
-    rule_group_id = "prerequisites"
+    rule_group_id = "connectivity"
 
     if os.environ.get("HTTP_PROXY") is None:
         write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, "Machine has no proxy enabled.")
@@ -1127,8 +1134,8 @@ def check_proxy_connectivity():
 
 def MinTlsVersionCheck():
     rule_id = "Linux.TlsVersionCheck"
-    rule_group_id = "prerequisites"
-    
+    rule_group_id = "connectivity"
+
     context = ssl.create_default_context()
 
     try:
@@ -1144,19 +1151,19 @@ def MinTlsVersionCheck():
     except Exception as e:
         write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, "Error occurred: %s" % e)
     finally:
-        if "ssock" in locals():
+        if 'ssock' in locals():
             ssock.close()
-        if "sock" in locals():
+        if 'sock' in locals():
             sock.close()
 
 def check_https_connectivity():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # sock.settimeout(10)
     rule_id = "Linux.HttpsCheck"
-    rule_group_id = "prerequisites"
+    rule_group_id = "connectivity"
     try:
         response = sock.connect_ex(("login.microsoftonline.com", 443))
-        
+
         if response == 0:
             write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, "Machine is connected to internet and can make https requests.")
         else:
@@ -1178,7 +1185,7 @@ def check_azure_extension():
 
 def check_autoassessment_service():
     rule_id = "Linux.AutoAssessment"
-    rule_group_id = "machineSettings"
+    rule_group_id = "extensions"
     rule_name = "MsftLinuxPatchAutoAssess Check"
     command = "sudo systemctl is-active MsftLinuxPatchAutoAssess.timer"
     grep_output = os.popen(command).read()
@@ -1197,7 +1204,7 @@ def check_autoassessment_service():
 
 def check_walinuxagent_service():
     rule_id = "Linux.WALinuxAgent"
-    rule_group_id = "guestagentservices"
+    rule_group_id = "SystemServices"
     command = "sudo systemctl is-active walinuxagent"
     grep_output = os.popen(command).read()
     if "active" not in str(grep_output):
@@ -1212,14 +1219,14 @@ def is_process_running(process_name, search_criteria, output_name):
         return True, grep_output
     else:
         return False, grep_output
-    
+
 def check_tcp_connection(url):
     try:
         with socket.create_connection((url, 443), timeout=5) as sock:
             return 1
     except socket.error as e:
         return 0
-    
+
 def write_log_output(rule_id, rule_group_id, status, failure_reason, log_msg, *result_msg_args):
     global output, rule_info_list
 
@@ -1249,3 +1256,12 @@ if __name__ == "__main__":
         main(sys.argv[1])
     else:
         main()
+' > "$scriptName"
+chmod +x "$scriptName"
+which python2 > /dev/null 2>&1
+if [ $? = 0 ]; then
+    python2 "$scriptName" None True
+else
+    python3 "$scriptName" None True
+fi
+rm -rf "$scriptName"
