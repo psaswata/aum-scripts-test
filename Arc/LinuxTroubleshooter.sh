@@ -1,3 +1,10 @@
+timestamp() {
+    date +"%T"
+}
+scriptName="/root/$(timestamp).py"
+urlRegex="'https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]'"
+
+echo '
 #!/usr/bin/env python
 from __future__ import print_function
 import os
@@ -967,7 +974,7 @@ class RepositoryManager:
         for str1 in out1:
             # Split the line into parts and filter out empty strings
             parts = list(filter(None, str1.split(" ")))
-            # Skip lines that don't have at least 3 parts (deb, [options], URL)
+            # Skip lines that do not have at least 3 parts (deb, [options], URL)
             if len(parts) < 2:
                 continue
             # Check if the second part is an option (e.g., [arch=amd64]) and skip it
@@ -1432,3 +1439,12 @@ if __name__ == "__main__":
         main(sys.argv[1])
     else:
         main()
+' > "$scriptName"
+chmod +x "$scriptName"
+which python2 > /dev/null 2>&1
+if [ $? = 0 ]; then
+    python2 "$scriptName" None True
+else
+    python3 "$scriptName" None True
+fi
+rm -rf "$scriptName"
