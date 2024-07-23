@@ -1151,9 +1151,9 @@ def MinTlsVersionCheck():
     except Exception as e:
         write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, "Error occurred: %s" % e)
     finally:
-        if 'ssock' in locals():
+        if "ssock" in locals():
             ssock.close()
-        if 'sock' in locals():
+        if "sock" in locals():
             sock.close()
 
 def check_https_connectivity():

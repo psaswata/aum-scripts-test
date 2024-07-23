@@ -978,7 +978,7 @@ class RepositoryManager:
             if len(parts) < 2:
                 continue
             # Check if the second part is an option (e.g., [arch=amd64]) and skip it
-            urlIndex = 2 if parts[1].startswith('[') and parts[1].endswith(']') else 1
+            urlIndex = 2 if parts[1].startswith("[") and parts[1].endswith("]") else 1
             if len(parts) > urlIndex:
                 repoList.append(parts[urlIndex])
         return repoList
