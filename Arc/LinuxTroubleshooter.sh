@@ -6,9 +6,11 @@ urlRegex="'https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]'"
 output_path="None"
 if [ ! -z "$1" ]; then
     output_path="$1"
+fi
 return_json_output="False"
 if [ ! -z "$2" ]; then
     return_json_output="$2"
+fi
 
 echo '
 #!/usr/bin/env python
