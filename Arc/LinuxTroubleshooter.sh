@@ -3,10 +3,10 @@ timestamp() {
 }
 scriptName="/root/$(timestamp).py"
 urlRegex="'https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]'"
-output_path= "None"
+output_path="None"
 if [ -n "$1" ]; then
     output_path = $1
-return_json_output= "False"
+return_json_output="False"
 if [ -n "$1" ]; then
     return_json_output = $2
 
