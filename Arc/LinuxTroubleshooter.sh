@@ -3,6 +3,8 @@ timestamp() {
 }
 scriptName="/root/$(timestamp).py"
 urlRegex="'https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]'"
+output_path= if [ -z "$1" ]; then "None" elif "$1"
+return_json_output= if [ -z "$2" ]; then "False" elif "$2"
 
 echo '
 #!/usr/bin/env python
@@ -1443,8 +1445,8 @@ if __name__ == "__main__":
 chmod +x "$scriptName"
 which python2 > /dev/null 2>&1
 if [ $? = 0 ]; then
-    python2 "$scriptName" None True
+    python2 "$scriptName" "$output_path" "$return_json_output"
 else
-    python3 "$scriptName" None True
+    python3 "$scriptName" "$output_path" "$return_json_output"
 fi
 rm -rf "$scriptName"
