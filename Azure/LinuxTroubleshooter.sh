@@ -3,8 +3,12 @@ timestamp() {
 }
 scriptName="/root/$(timestamp).py"
 urlRegex="'https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]'"
-output_path= if [ [-z "$1"] ]; then "None" elif "$1"
-return_json_output= if [ [-z "$2"] ]; then "False" elif "$2"
+output_path= "None"
+if [ -n "$1" ]; then
+    output_path = $1
+return_json_output= "False"
+if [ -n "$1" ]; then
+    return_json_output = $2
 
 echo '
 #!/usr/bin/env python
