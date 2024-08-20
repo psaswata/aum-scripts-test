@@ -1123,14 +1123,14 @@ def check_access_to_linux_repos():
 def main(output_path=None, return_json_output="False"):
     if os.geteuid() != 0:
         print ("Please run this script as root")
-        write_log_output("Linux.SudoCheck","prerequisites",status_failed,empty_failure_reason,"Please run this script as root")
+        write_log_output("SudoCheck","prerequisites",status_failed,empty_failure_reason,"Please run this script as root")
         exit()
     else:
         print("Running as root")
-        write_log_output("Linux.SudoCheck","prerequisites",status_passed,empty_failure_reason,"Running as root")
+        write_log_output("SudoCheck","prerequisites",status_passed,empty_failure_reason,"Running as root")
     
     # supported python version greter than 2.7.x
-    rule_id_python = "Linux.PythonVersionCheck"
+    rule_id_python = "PythonVersionCheck"
     rule_group_id_python = "prerequisites"
     if(sys.version_info[0] == 2) and (sys.version_info[1] < 7):
         print("Unsupported python version:" + str(sys.version_info))
