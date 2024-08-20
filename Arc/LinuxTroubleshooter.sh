@@ -1104,9 +1104,9 @@ def check_access_to_linux_repos():
     
     global CheckResultMessageArguments_RepoCheck
     global CheckResultMessage_RepoCheck
-    rule_id = "Linux.ReposAccessCheck"
+    rule_id = "ReposAccessCheck"
     rule_group_id = "machineSettings"
-    rule_name = "Repository Access Check"
+    rule_name = "Repository access Check"
 
     repoMgr = RepositoryManager()
     status = repoMgr.checkRule()
@@ -1148,13 +1148,11 @@ def main(output_path=None, return_json_output="False"):
     get_machine_info()
     check_os_version()
     check_proxy_connectivity()
-    check_arc_extension()
     MinTlsVersionCheck()
     check_https_connectivity()
     check_Arc_required_endpoints()
-    check_azcmagentANDservices()
+    #check_azcmagentANDservices()
     check_autoassessment_service()
-    check_azure_extension()
 
     try:
         print ("Checking access to linux repos")
@@ -1215,8 +1213,8 @@ def get_os_type():
         return OSType.NotAvailable
 
 def check_os_version():
-    rule_id = "Linux.OperatingSystemCheck"
-    rule_name = "Operating System Check"
+    rule_id = "OSSupportedCheck"
+    rule_name = "Operating system supported check"
     rule_group_id = "prerequisites"
     os_tuple = utils.get_linux_distribution()
     os_version = os_tuple[0] + "-" + os_tuple[1]
@@ -1248,17 +1246,17 @@ def check_os_version():
         write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, log_msg, supported_os_url)
  
 def check_proxy_connectivity():
-    rule_id = "Linux.ProxyCheck"
+    rule_id = "ProxySettingsCheck"
     rule_group_id = "prerequisites"
-    rule_name = "Proxy Check"
+    rule_name = "Proxy settings check"
 
     if os.environ.get("HTTP_PROXY") is None:
-        write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, "Machine has no proxy enabled.")
+        write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, "Proxy is not set")
     else:
-        write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, "Machine has proxy enabled.")
+        write_log_output(rule_id, rule_group_id, status_passedWithWarning, empty_failure_reason, "Proxy is set")
 
 def MinTlsVersionCheck():
-    rule_id = "Linux.TlsVersionCheck"
+    rule_id = "TlsVersionCheck"
     rule_group_id = "prerequisites"
     
     context = ssl.create_default_context()
@@ -1282,9 +1280,9 @@ def MinTlsVersionCheck():
             sock.close()   
 
 def check_https_connectivity():
-    rule_id = "Linux.HttpsCheck"
+    rule_id = "HttpsConnectionCheck"
     rule_group_id = "prerequisites"
-    rule_name = "HTTPS Connectivity Check"
+    rule_name = "Https connection check"
     
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # sock.settimeout(10)
@@ -1301,56 +1299,23 @@ def check_https_connectivity():
     finally:
         sock.close()
 
-
-# def check_azureagent():
-#     # currently dummy function need to update with azure agent related checks
-#     return 0
-
-def check_arc_extension():
-    rule_id = "Linux.ArcExtension"
-    rule_group_id = "extensions"
-    rule_name = "LinuxOsUpdateExtension Check"
-
-    command = "ls /var/lib/waagent/ | grep Microsoft.SoftwareUpdateManagement.LinuxOsUpdateExtension"
-    grep_output = os.popen(command).read()
-    if( grep_output == ""):
-            write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, " LinuxOsUpdateExtension is not installed")
-    else:
-        write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, " LinuxOsUpdateExtension is installed: "+ str(grep_output))
-
-
-def check_azure_extension():
-    rule_id = "Linux.AzureExtension"
-    rule_group_id = "extensions"
-    rule_name = "LinuxPatchExtension Check"
-
-    command = "ls /var/lib/waagent/ | grep Microsoft.CPlat.Core.LinuxPatchExtension"
-    grep_output = os.popen(command).read()
-    if( grep_output == ""):
-            write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, " LinuxPatchExtension is not installed")
-    else:
-        write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, " LinuxPatchExtension is installed: "+ str(grep_output))
-
 def check_autoassessment_service():
-    rule_id = "Linux.AutoAssessment"
-    rule_group_id = "machineSettings"
+    rule_group_id = "machinesettings"
     rule_name = "MsftLinuxPatchAutoAssess Check"
     command = "sudo systemctl is-active MsftLinuxPatchAutoAssess.timer"
     grep_output = os.popen(command).read()
     if "active" not in str(grep_output):
-        write_log_output("Linux.AutoAssessment.timer", rule_group_id, status_failed, empty_failure_reason," MsftLinuxPatchAutoAssess.timer is not active")
+        write_log_output("AutoAssessmentTimerCheck", rule_group_id, status_failed, empty_failure_reason," MsftLinuxPatchAutoAssess.timer is not active")
     else:
-        write_log_output("Linux.AutoAssessment.timer",  rule_group_id, status_passed , empty_failure_reason, " MsftLinuxPatchAutoAssess.timer is active")
-
+        write_log_output("AutoAssessmentTimerCheck",  rule_group_id, status_passed , empty_failure_reason, " MsftLinuxPatchAutoAssess.timer is active")
 
     command = "sudo systemctl is-enabled MsftLinuxPatchAutoAssess.service"
     grep_output = os.popen(command).read()
     if "enabled" not in str(grep_output):
-        write_log_output("Linux.AutoAssessment.service", rule_group_id, status_failed, empty_failure_reason," MsftLinuxPatchAutoAssess.service is not enabled")
+        write_log_output("AutoAssessmentServiceCheck", rule_group_id, status_failed, empty_failure_reason," MsftLinuxPatchAutoAssess.service is not enabled")
     else:
-        write_log_output("Linux.AutoAssessment.service", rule_group_id, status_passed , empty_failure_reason, " MsftLinuxPatchAutoAssess.service is enabled")
+        write_log_output("AutoAssessmentServiceCheck", rule_group_id, status_passed , empty_failure_reason, " MsftLinuxPatchAutoAssess.service is enabled")
     return 0
-
 
 def check_azcmagentANDservices():
     rule_id = ""
@@ -1372,9 +1337,9 @@ def check_azcmagentANDservices():
         check_service_state("himdsd")
         command = "azcmagent show"
         grep_output = os.popen(command).read()
-        write_log_output("Linux.Agent", rule_group_id, status_passed, empty_failure_reason, str(grep_output))
+        write_log_output("ArcAgentStatusCheck", rule_group_id, status_passed, empty_failure_reason, str(grep_output))
     else:
-        write_log_output("Linux.Agent", rule_group_id, status_failed , empty_failure_reason, "azcmagent is not present on the machine")
+        write_log_output("ArcAgentStatusCheck", rule_group_id, status_failed , empty_failure_reason, "azcmagent is not present on the machine")
     FNULL.close()
 
 def is_process_running(process_name, search_criteria, output_name):
@@ -1394,9 +1359,9 @@ def check_tcp_connection(url):
         return 0
     
 def check_Arc_required_endpoints():
-    rule_id = "Linux.ArcEndpointsCheck"
+    rule_id = "ArcRequiredEndpointsCheck"
     rule_group_id = "connectivity"
-    rule_name = "Arc Required Endpoints Check"
+    rule_name = "Azure arc required endpoints check"
 
     urls = [
         "login.microsoftonline.com",

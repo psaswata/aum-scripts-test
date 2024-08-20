@@ -3,11 +3,6 @@ param(
     [switch]$returnAsJson
 )
 
-[Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
-$validationResults = @()
-[string]$CurrentResult = ""
-[string]$CurrentDetails = ""
-
 function New-RuleCheckResult
 {
     [CmdletBinding()]
@@ -83,24 +78,24 @@ function getRegValue {
     return $val.$name
 }
 
-function Validate-OperatingSystem {
-    $osRequirementsLink = "https://learn.microsoft.com/en-us/azure/update-manager/support-matrix?tabs=public%2Cazurevm-os"
+function Validate-OperatingSystemSupported {
+    $osRequirementsLink = "https://learn.microsoft.com/en-us/azure/update-manager/support-matrix?tabs=azurearc-os%2Cpublic%2Cthird-party-win"
 
-    $ruleId = "OperatingSystemCheck"
-    $ruleName = "Operating System"
-    $ruleDescription = "The Windows Operating system must be version 6.1.7601 (Windows Server 2008 R2 SP1) or higher"
+    $ruleId = "OSSupportedCheck"
+    $ruleName = "Operating system supported check"
+    $ruleDescription = "The Windows Operating system must be version 6.1.7601 (Windows Server 2008 R2 SP1) or higher."
     $result = $null
     $resultMessage = $null
     $ruleGroupId = "prerequisites"
-    $ruleGroupName = "Prerequisite Checks"
+    $ruleGroupName = "Prerequisites Checks"
     $resultMessageArguments = @()
 
     if([System.Environment]::OSVersion.Version -ge [System.Version]"6.3.9600") {
         $result = "Passed"
-        $resultMessage = "Operating System version is supported"
+        $resultMessage = "Operating System version is supported."
     } else {
         $result = "Failed"
-        $resultMessage = "Operating System version is not supported. Supported versions listed here: $osRequirementsLink"
+        $resultMessage = "Operating System version is not supported. Supported versions listed here: $osRequirementsLink."
         $resultMessageArguments += $osRequirementsLink
     }
     $resultMessageId = "$ruleId.$result"
@@ -108,16 +103,16 @@ function Validate-OperatingSystem {
     return New-RuleCheckResult $ruleId $ruleName $ruleDescription $result $resultMessage $ruleGroupId $ruleGroupName $resultMessageId $resultMessageArguments
 }
 
-function Validate-NetFrameworkInstalled {
+function Validate-DotNetFrameworkInstalled {
     $netFrameworkDownloadLink = "https://dotnet.microsoft.com/en-us/download/dotnet-framework"
 
     $ruleId = "DotNetFrameworkInstalledCheck"
-    $ruleName = ".Net Framework 4.5+"
-    $ruleDescription = ".NET Framework version 4.5 or higher is required"
+    $ruleName = "Dot Net Framework installed check"
+    $ruleDescription = ".NET Framework version 4.5 or higher is required."
     $result = $null
     $resultMessage = $null
     $ruleGroupId = "prerequisites"
-    $ruleGroupName = "Prerequisite Checks"
+    $ruleGroupName = "Prerequisites Checks"
     $resultMessageArguments = @()
 
     # https://docs.microsoft.com/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed
@@ -126,15 +121,15 @@ function Validate-NetFrameworkInstalled {
         $versionCheck = (Get-ChildItem $dotNetFullRegistryPath) | Get-ItemPropertyValue -Name Release | ForEach-Object { $_ -ge 378389 }
         if($versionCheck -eq $true) {
             $result = "Passed"
-            $resultMessage = ".NET Framework version 4.5+ is found"
+            $resultMessage = ".NET Framework version 4.5+ is found."
         } else {
             $result = "Failed"
-            $resultMessage = ".NET Framework version 4.5 or higher is required: $netFrameworkDownloadLink"
+            $resultMessage = ".NET Framework version 4.5 or higher is required: $netFrameworkDownloadLink."
             $resultMessageArguments += $netFrameworkDownloadLink
         }
     } else{
         $result = "Failed"
-        $resultMessage = ".NET Framework version 4.5 or higher is required: $netFrameworkDownloadLink"
+        $resultMessage = ".NET Framework version 4.5 or higher is required: $netFrameworkDownloadLink."
         $resultMessageArguments += $netFrameworkDownloadLink
     }
     $resultMessageId = "$ruleId.$result"
@@ -142,48 +137,48 @@ function Validate-NetFrameworkInstalled {
     return New-RuleCheckResult $ruleId $ruleName $ruleDescription $result $resultMessage $ruleGroupId $ruleGroupName $resultMessageId $resultMessageArguments
 }
 
-function Validate-TlsEnabled {
+function Validate-TLSVersion {
     $ruleId = "TlsVersionCheck"
-    $ruleName = "TLS 1.2"
-    $ruleDescription = "Client and Server connections must support TLS 1.2"
+    $ruleName = "TLS version check"
+    $ruleDescription = "Client and Server connections must support TLS 1.2."
     $result = $null
     $reason = ""
     $resultMessage = $null
     $ruleGroupId = "prerequisites"
-    $ruleGroupName = "Prerequisite Checks"
+    $ruleGroupName = "Prerequisites Checks"
 
     $tls12RegistryPath = "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.2\\"
     $serverEnabled =     checkRegValue ([System.String]::Concat($tls12RegistryPath, "Server")) "Enabled" 1
-    $ServerNotDisabled = checkRegValue ([System.String]::Concat($tls12RegistryPath, "Server")) "DisabledByDefault" 0
+    $serverNotDisabled = checkRegValue ([System.String]::Concat($tls12RegistryPath, "Server")) "DisabledByDefault" 0
     $clientEnabled =     checkRegValue ([System.String]::Concat($tls12RegistryPath, "Client")) "Enabled" 1
-    $ClientNotDisabled = checkRegValue ([System.String]::Concat($tls12RegistryPath, "Client")) "DisabledByDefault" 0
+    $clientNotDisabled = checkRegValue ([System.String]::Concat($tls12RegistryPath, "Client")) "DisabledByDefault" 0
 
-    $ServerNotEnabled = checkRegValue ([System.String]::Concat($tls12RegistryPath, "Server")) "Enabled" 0
-    $ServerDisabled =   checkRegValue ([System.String]::Concat($tls12RegistryPath, "Server")) "DisabledByDefault" 1
-    $ClientNotEnabled = checkRegValue ([System.String]::Concat($tls12RegistryPath, "Client")) "Enabled" 0
-    $ClientDisabled =   checkRegValue ([System.String]::Concat($tls12RegistryPath, "Client")) "DisabledByDefault" 1
+    $serverNotEnabled = checkRegValue ([System.String]::Concat($tls12RegistryPath, "Server")) "Enabled" 0
+    $serverDisabled =   checkRegValue ([System.String]::Concat($tls12RegistryPath, "Server")) "DisabledByDefault" 1
+    $clientNotEnabled = checkRegValue ([System.String]::Concat($tls12RegistryPath, "Client")) "Enabled" 0
+    $clientDisabled =   checkRegValue ([System.String]::Concat($tls12RegistryPath, "Client")) "DisabledByDefault" 1
 
     if ($validationResults[0].CheckResult -ne "Passed" -and [System.Environment]::OSVersion.Version -ge [System.Version]"6.0.6001") {
         $result = "Failed"
         $resultMessageId = "$ruleId.$result"
-        $resultMessage = "TLS 1.2 is not enabled by default on the Operating System. Follow the instructions to enable it: https://support.microsoft.com/help/4019276/update-to-add-support-for-tls-1-1-and-tls-1-2-in-windows"
+        $resultMessage = "TLS 1.2 is not enabled by default on the Operating System. Follow the instructions to enable it: https://support.microsoft.com/help/4019276/update-to-add-support-for-tls-1-1-and-tls-1-2-in-windows."
     } elseif([System.Environment]::OSVersion.Version -ge [System.Version]"6.1.7601" -and [System.Environment]::OSVersion.Version -le [System.Version]"6.1.8400") {
-        if($ClientNotDisabled -and $ServerNotDisabled -and !($ServerNotEnabled -and $ClientNotEnabled)) {
+        if($clientNotDisabled -and $serverNotDisabled -and !($serverNotEnabled -and $clientNotEnabled)) {
             $result = "Passed"
-            $resultMessage = "TLS 1.2 is enabled on the Operating System."
+            $resultMessage = "TLS 1.2 is enabled on the Operating System"
             $resultMessageId = "$ruleId.$result"
         } else {
             $result = "Failed"
             $reason = "NotExplicitlyEnabled"
             $resultMessageId = "$ruleId.$result.$reason"
-            $resultMessage = "TLS 1.2 is not enabled by default on the Operating System. Follow the instructions to enable it: https://docs.microsoft.com/windows-server/security/tls/tls-registry-settings#tls-12"
+            $resultMessage = "TLS 1.2 is not enabled by default on the Operating System. Follow the instructions to enable it: https://docs.microsoft.com/windows-server/security/tls/tls-registry-settings#tls-12."
         }
     } elseif([System.Environment]::OSVersion.Version -ge [System.Version]"6.2.9200") {
-        if($ClientDisabled -or $ServerDisabled -or $ServerNotEnabled -or $ClientNotEnabled) {
+        if($clientDisabled -or $serverDisabled -or $serverNotEnabled -or $clientNotEnabled) {
             $result = "Failed"
             $reason = "ExplicitlyDisabled"
             $resultMessageId = "$ruleId.$result.$reason"
-            $resultMessage = "TLS 1.2 is supported by the Operating System, but currently disabled. Follow the instructions to re-enable: https://docs.microsoft.com/windows-server/security/tls/tls-registry-settings#tls-12"
+            $resultMessage = "TLS 1.2 is supported by the Operating System, but currently disabled. Follow the instructions to re-enable: https://docs.microsoft.com/windows-server/security/tls/tls-registry-settings#tls-12."
         } else {
             $result = "Passed"
             $reason = "EnabledByDefault"
@@ -198,27 +193,6 @@ function Validate-TlsEnabled {
     }
     return New-RuleCheckResult $ruleId $ruleName $ruleDescription $result $resultMessage $ruleGroupId $ruleGroupName $resultMessageId
 }
-function Validate-ArcWindowsOSUpdateExtension {
-    $ruleId = "WindowsOSPatchExtension"
-    $ruleName = "Windows OS Patch Extension Check"
-    $ruleDescription = "WindowsOSPatchExtension should be installed on the VM"
-    $result = $null
-    $resultMessage = $null
-    $ruleGroupId = "extensions"
-    $ruleGroupName = "Extension Checks"
-    $resultMessageArguments = @()
-    $extensionPath = "C:\Packages\Plugins\Microsoft.SoftwareUpdateManagement.WindowsOsUpdateExtension" 
-
-    if (Test-Path -Path $extensionPath -PathType Container) {
-        $result = "Passed"
-        $resultMessage = "WindowsOSPatchExtension is installed on the VM"
-    } else {
-        $result = "Failed"
-        $resultMessage = "WindowsOSPatchExtension is not installed on the VM"
-    }
-    $resultMessageId = "$ruleId.$result"
-    return New-RuleCheckResult $ruleId $ruleName $ruleDescription $result $resultMessage $ruleGroupId $ruleGroupName $resultMessageId $resultMessageArguments
-}
 
 function Validate-ServiceStatus {
     [CmdletBinding()]
@@ -226,13 +200,13 @@ function Validate-ServiceStatus {
         [string][Parameter(Mandatory=$true)]$service,
         [string][Parameter(Mandatory=$true)]$ruleId,
         [string][Parameter(Mandatory=$true)]$ruleName,
-        [string]$ruleDescription = "Agent related services must be running to ensure proper working of the agent"
+        [string]$ruleDescription = "Azure Arc Agent related services must be running to ensure proper working of the arc agent."
     )
 
     $result = $null
     $resultMessage = $null
     $ruleGroupId = "arcagentservices"
-    $ruleGroupName = "Agent Services Check"
+    $ruleGroupName = "Azure Arc Agent Checks"
     $resultMessageArguments = @()
 
     $serviceObj = Get-Service -Name $service -ErrorAction SilentlyContinue
@@ -247,23 +221,13 @@ function Validate-ServiceStatus {
     return New-RuleCheckResult $ruleId $ruleName $ruleDescription $result $resultMessage $ruleGroupId $ruleGroupName $resultMessageId $resultMessageArguments
 }
 
-function Validate-ArcAgentServices { 
+function Validate-AzureArcAgentServices { 
     $services = @(
         @{
             "service" = "himds";
-            "ruleId" = "HimdsServiceHealthCheck";
-            "ruleName" = "Himds service must be running"
+            "ruleId" = "HimdsServiceCheck";
+            "ruleName" = "Himds service check"
         }
-        # @{
-        #     "service" = "GCArcService";
-        #     "ruleId" = "GCArcServiceHealthCheck";
-        #     "ruleName" = "Guest Configuration Arc service must be running"
-        # },
-        # @{
-        #     "service" = "ExtensionService";
-        #     "ruleId" = "ExtensionServiceHealthCheck";
-        #     "ruleName" = "Guest Configuration Extension service must be running"
-        # }
     )
     
     # Validate Service Status for each service
@@ -271,29 +235,6 @@ function Validate-ArcAgentServices {
         Validate-ServiceStatus $service.service $service.ruleId $service.ruleName
     }
 }
-
-function Validate-AzureWindowsPatchExtension {
-    $ruleId = "WindowsPatchExtension"
-    $ruleName = "Windows Patch Extension Check"
-    $ruleDescription = "WindowsPatchExtension should be installed on the VM"
-    $result = $null
-    $resultMessage = $null
-    $ruleGroupId = "extensions"
-    $ruleGroupName = "Extension Checks"
-    $resultMessageArguments = @()
-    $extensionPath = "C:\Packages\Plugins\Microsoft.CPlat.Core.WindowsPatchExtension" 
-
-    if (Test-Path -Path $extensionPath -PathType Container) {
-        $result = "Passed"
-        $resultMessage = "WindowsPatchExtension is installed on the VM"
-    } else {
-        $result = "Failed"
-        $resultMessage = "WindowsPatchExtension is not installed on the VM"
-    }
-    $resultMessageId = "$ruleId.$result"
-    return New-RuleCheckResult $ruleId $ruleName $ruleDescription $result $resultMessage $ruleGroupId $ruleGroupName $resultMessageId $resultMessageArguments
-}
-
 
 function Is-EndpointReachable {
     [CmdletBinding()]
@@ -323,33 +264,7 @@ function Is-EndpointReachable {
     return $result
 }
 
-function Validate-EndpointConnectivity {
-    [CmdletBinding()]
-    param(
-        [string][Parameter(Mandatory=$true)]$endpoint,
-        [string][Parameter(Mandatory=$true)]$ruleId,
-        [string][Parameter(Mandatory=$true)]$ruleName,
-        [string]$ruleDescription = "Proxy and firewall configuration must allow the system to communicate with $endpoint"
-    )
-
-    $result = $null
-    $resultMessage = $null
-    $ruleGroupId = "connectivity"
-    $ruleGroupName = "connectivity"
-    $resultMessageArguments = @() + $endpoint
-
-    $result = Is-EndpointReachable $endpoint
-    if($result -eq "Passed") {
-        $resultMessage = "TCP Test for $endpoint (port 443) succeeded"
-    } else {
-        $resultMessage = "TCP Test for $endpoint (port 443) failed"
-    }
-
-    $resultMessageId = "$ruleId.$result"
-
-    return New-RuleCheckResult $ruleId $ruleName $ruleDescription $result $resultMessage $ruleGroupId $ruleGroupName $resultMessageId $resultMessageArguments
-}
-function Validate-ArcRequiredEndpoints {
+function Validate-AzureArcEndpointConnectivity {
     $endpoints = @(
         "login.microsoftonline.com",
         "management.azure.com",
@@ -367,12 +282,12 @@ function Validate-ArcRequiredEndpoints {
     }
 
     $ruleId = "ArcRequiredEndpointsCheck"
-    $ruleName = "ARC Required Endpoints Check"
-    $ruleDescription = "Proxy and firewall configuration must allow the system to communicate with ARC required endpoints"
+    $ruleName = "Azure arc required endpoints check"
+    $ruleDescription = "Proxy and firewall configuration must allow the system to communicate with Azure arc required endpoints."
     $result = if ($failedEndpoints.Count -eq 0) { "Passed" } else { "Failed" }
     $resultMessage = if ($failedEndpoints.Count -eq 0) { "All endpoints are reachable." } else { "Failed to reach the following endpoints: $($failedEndpoints -join ', ')" }
     $ruleGroupId = "connectivity"
-    $ruleGroupName = "connectivity"
+    $ruleGroupName = "Connectivity Checks"
     $resultMessageId = "$ruleId.$result"
     $resultMessageArguments = $failedEndpoints
 
@@ -400,13 +315,13 @@ function Validate-WindowsUpdateEndpointConnectivity {
         }
     }
 
-    $ruleId = "UpdateEndpointConnectivityCheck"
-    $ruleName = "Windows Update Endpoint Connectivity Check"
-    $ruleDescription = "Proxy and firewall configuration must allow the system to communicate with Windows Update endpoints"
+    $ruleId = "WUEndpointConnectivityCheck"
+    $ruleName = "Windows update endpoints connectivity check"
+    $ruleDescription = "Proxy and firewall configuration must allow the system to communicate with Windows Update endpoints."
     $result = if ($failedEndpoints.Count -eq 0) { "Passed" } else { "Failed" }
     $resultMessage = if ($failedEndpoints.Count -eq 0) { "All endpoints are reachable." } else { "Failed to reach the following endpoints: $($failedEndpoints -join ', ')" }
-    $ruleGroupId = "machineSettings"
-    $ruleGroupName = "connectivity"
+    $ruleGroupId = "connectivity"
+    $ruleGroupName = "Connectivity Checks"
     $resultMessageId = "$ruleId.$result"
     $resultMessageArguments = $failedEndpoints
 
@@ -415,13 +330,12 @@ function Validate-WindowsUpdateEndpointConnectivity {
 
 function Validate-AlwaysAutoRebootEnabled {
     $ruleId = "AlwaysAutoRebootCheck"
-    $ruleName = "AutoReboot"
-    $ruleDescription = "Automatic reboot should not be enable as it forces a reboot irrespective of update configuration"
+    $ruleName = "Always auto reboot check"
+    $ruleDescription = "Automatic reboot should not be enabled as it forces a reboot irrespective of update configuration."
     $result = $null
-    $reason = ""
     $resultMessage = $null
-    $ruleGroupId = "machineSettings"
-    $ruleGroupName = "Machine Override Checks"
+    $ruleGroupId = "machinesettings"
+    $ruleGroupName = "Machine Update Settings Checks"
 
     $automaticUpdatePath = "HKLM:\\Software\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU"
     $rebootEnabledBySchedule = checkRegValue ($automaticUpdatePath) "AlwaysAutoRebootAtScheduledTime" 1
@@ -430,12 +344,11 @@ function Validate-AlwaysAutoRebootEnabled {
 
     if (  $rebootEnabledBySchedule -or $rebootEnabledByDuration ) {
         $result = "PassedWithWarning"
-        $reason = "Auto Reboot is enabled on the system and will interfere with Update Management Configuration passed during runs"
-        $resultMessage = "Windows Update reboot registry keys are set. This can cause unexpected reboots when installing updates"
+        $resultMessage = "Windows Update reboot registry keys are set to automatic reboot. This can cause unexpected reboots when installing updates."
     }
     else {
         $result = "Passed"
-        $resultMessage = "Windows Update reboot registry keys are not set to automatically reboot"
+        $resultMessage = "Windows Update reboot registry keys are not set to automatically reboot."
 
     }
     $resultMessageId = "$ruleId.$result"
@@ -444,13 +357,12 @@ function Validate-AlwaysAutoRebootEnabled {
 
 function Validate-AutomaticUpdateEnabled {
     $ruleId = "AutomaticUpdateCheck"
-    $ruleName = "AutoUpdate"
-    $ruleDescription = "AutoUpdate should not be enabled on the machine"
+    $ruleName = "Automatic update check"
+    $ruleDescription = "Automatic update should not be enabled on the machine."
     $result = $null
-    $reason = ""
     $resultMessage = $null
-    $ruleGroupId = "machineSettings"
-    $ruleGroupName = "Machine Override Checks"
+    $ruleGroupId = "machinesettings"
+    $ruleGroupName = "Machine Update Settings Checks"
 
     $automaticUpdatePath = "HKLM:\\Software\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU"
     $autoUpdateEnabled = checkRegValue ($automaticUpdatePath) "AUOptions" 4
@@ -458,12 +370,11 @@ function Validate-AutomaticUpdateEnabled {
 
     if ( $autoUpdateEnabled ) {
         $result = "PassedWithWarning"
-        $reason = "Auto Update is enabled on the machine and will interfere with Update management Solution"
-        $resultMessage = "Windows Update will automatically download and install new updates as they become available"
+        $resultMessage = "Windows Update will automatically download and install new updates as they become available."
     }
     else {
         $result = "Passed"
-        $resultMessage = "Windows Update is not set to automatically install updates as they become available"
+        $resultMessage = "Windows Update is not set to automatically install updates as they become available."
 
     }
     $resultMessageId = "$ruleId.$result"
@@ -471,14 +382,13 @@ function Validate-AutomaticUpdateEnabled {
 }
 
 function Validate-WSUSServerConfigured {
-    $ruleId = "WSUSServerConfigured"
-    $ruleName = "isWSUSServerConfigured"
-    $ruleDescription = "Increase awareness on WSUS configured on the server"
+    $ruleId = "WSUSServerConfiguredCheck"
+    $ruleName = "WSUS server configured check"
+    $ruleDescription = "Increase awareness on WSUS configured on the server."
     $result = $null
-    $reason = ""
     $resultMessage = $null
     $ruleGroupId = "machineSettings"
-    $ruleGroupName = "Machine Override Checks"
+    $ruleGroupName = "Machine Update Settings Checks"
 
     $automaticUpdatePath = "HKLM:\\Software\\Policies\\Microsoft\\Windows\\WindowsUpdate"
     $wsusServerConfigured = getRegValue ($automaticUpdatePath) "WUServer"
@@ -489,12 +399,11 @@ function Validate-WSUSServerConfigured {
         $testResult = Test-NetConnection -ComputerName $wsusUri.Host -Port $wsusUri.Port 
         if ($testResult.TcpTestSucceeded) {
            $result = "PassedWithWarning"
-           $reason = "WSUS Server is configured on the server"
            $resultMessage = "Windows Updates are downloading from a configured WSUS Server $wsusServerConfigured."
            $resultMessageArguments = @() + $wsusServerConfigured
         } else {
            $result = "Failed"
-           $resultMessage = "WSUS Server is not accessible $wsusServerConfigured"
+           $resultMessage = "WSUS Server is not accessible $wsusServerConfigured."
            $resultMessageArguments = @() + $wsusServerConfigured
         }
     }
@@ -508,11 +417,11 @@ function Validate-WSUSServerConfigured {
 
 function Validate-HttpsConnection {
     $ruleId = "HttpsConnectionCheck"
-    $ruleName = "Https Connection Check"
+    $ruleName = "Https connection check"
     $result = $null
     $resultMessage = $null
     $ruleGroupId = "prerequisites"
-    $ruleGroupName = "Prerequisite Checks"
+    $ruleGroupName = "Prerequisites Checks"
     $endpoint = "login.microsoftonline.com"
     $resultMessageArguments = @() + $endpoint
 
@@ -529,13 +438,13 @@ function Validate-HttpsConnection {
 }
 
 function Validate-ProxySettings {
-    $ruleId = "ProxySettings"
-    $ruleName = "Proxy settings"
+    $ruleId = "ProxySettingsCheck"
+    $ruleName = "Proxy settings check"
     $ruleDescription = "Check if Proxy is enabled on the VM."
     $result = $null
     $resultMessage = ""
     $ruleGroupId = "prerequisites"
-    $ruleGroupName = "Prerequisite Checks"
+    $ruleGroupName = "Prerequisites Checks"
     $resultMessageId = ""
     $resultMessageArguments = @()
 
@@ -557,12 +466,12 @@ function Validate-WUIsEnabled {
     $windowsServiceDisplayName = "Windows Update"
 
     $ruleId = "WUServiceRunningCheck"
-    $ruleName = "WU service status"
-    $ruleDescription = "WU must not be in the disabled state."
+    $ruleName = "Windows update service running check"
+    $ruleDescription = "Windows update service must not be in the disabled state."
     $result = $null
     $resultMessage = $null
-    $ruleGroupId = "machineSettings"
-    $ruleGroupName = "Machine Settings Checks"
+    $ruleGroupId = "machinesettings"
+    $ruleGroupName = "Machine Update Settings"
     $resultMessageArguments = @()
 
     if(Get-Service -Name $windowsServiceName -ErrorAction SilentlyContinue | select -property name,starttype | Where-Object {$_.StartType -eq "Disabled"} | Select-Object) {
@@ -570,7 +479,7 @@ function Validate-WUIsEnabled {
         $resultMessage = "$windowsServiceDisplayName service ($windowsServiceName) is disabled. Please set it to automatic or manual. You can run 'sc config wuauserv start= demand' to set it to manual."
     } else {
         $result = "Passed"
-        $resultMessage = "$windowsServiceDisplayName service ($windowsServiceName) is running"
+        $resultMessage = "$windowsServiceDisplayName service ($windowsServiceName) is running."
     }
     $resultMessageId = "$ruleId.$result"
 
@@ -578,14 +487,14 @@ function Validate-WUIsEnabled {
 }
 
 function Validate-MUIsEnabled {
-    $ruleId = "MUenableCheck"
-    $ruleName = "MU Enable Check"
+    $ruleId = "MUEnableCheck"
+    $ruleName = "Microsoft update enabled check"
     $ruleDescription = "Microsoft Update must be running to receive updates for Microsoft Products."
     $result = $null
     $reason = ""
     $resultMessage = $null
-    $ruleGroupId = "machineSettings"
-    $ruleGroupName = "Machine Settings Check"
+    $ruleGroupId = "machinesettings"
+    $ruleGroupName = "Machine Update Settings"
     $resultMessageArguments = @()
 
     # Create a COM object to interact with the Windows Update Agent API
@@ -622,21 +531,20 @@ function Validate-MUIsEnabled {
     return New-RuleCheckResult $ruleId $ruleName $ruleDescription $result $resultMessage $ruleGroupId $ruleGroupName $resultMessageId $resultMessageArguments
 }
 
-$validationResults += Validate-OperatingSystem
-$validationResults += Validate-NetFrameworkInstalled
-$validationResults += Validate-TlsEnabled
-$validationResults += Validate-ArcWindowsOSUpdateExtension
-$validationResults += Validate-ArcAgentServices
-$validationResults += Validate-AzureWindowsPatchExtension
+$validationResults = @()
+$validationResults += Validate-OperatingSystemSupported
+$validationResults += Validate-DotNetFrameworkInstalled
+$validationResults += Validate-TLSVersion
 $validationResults += Validate-HttpsConnection
+$validationResults += Validate-ProxySettings
+$validationResults += Validate-AzureArcEndpointConnectivity
+$validationResults += Validate-AzureArcAgentServices
 $validationResults += Validate-WSUSServerConfigured
 if($null -ne $validationResults[-1] -and $validationResults[-1].CheckResult -eq "Passed") {
     $validationResults += Validate-WindowsUpdateEndpointConnectivity
 }
-$validationResults += Validate-ArcRequiredEndpoints
 $validationResults += Validate-AlwaysAutoRebootEnabled
 $validationResults += Validate-AutomaticUpdateEnabled
-$validationResults += Validate-ProxySettings
 $validationResults += Validate-WUIsEnabled
 $validationResults += Validate-MUIsEnabled
 

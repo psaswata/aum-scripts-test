@@ -994,9 +994,9 @@ def check_access_to_linux_repos():
 
     global CheckResultMessageArguments_RepoCheck
     global CheckResultMessage_RepoCheck
-    rule_id = "Linux.ReposAccessCheck"
-    rule_group_id = "connectivity"
-    rule_name = "Repository Access Check"
+    rule_id = "ReposAccessCheck"
+    rule_group_id = "machineSettings"
+    rule_name = "Repository access check"
 
     repoMgr = RepositoryManager()
     status = repoMgr.checkRule()
@@ -1014,14 +1014,14 @@ def check_access_to_linux_repos():
 def main(output_path=None, return_json_output="False"):
     if os.geteuid() != 0:
         print ("Please run this script as root")
-        write_log_output("Linux.SudoCheck","prerequisites",status_failed,empty_failure_reason,"Please run this script as root")
+        write_log_output("SudoCheck","prerequisites", status_failed, empty_failure_reason, "Please run this script as root")
         exit()
     else:
         print("Running as root")
-        write_log_output("Linux.SudoCheck","prerequisites",status_passed,empty_failure_reason,"Running as root")
+        write_log_output("SudoCheck","prerequisites", status_passed, empty_failure_reason, "Running as root")
 
     # supported python version greter than 2.7.x
-    rule_id_python = "Linux.PythonVersionCheck"
+    rule_id_python = "PythonVersionCheck"
     rule_group_id_python = "prerequisites"
     if(sys.version_info[0] == 2) and (sys.version_info[1] < 7):
         print("Unsupported python version:" + str(sys.version_info))
@@ -1036,12 +1036,12 @@ def main(output_path=None, return_json_output="False"):
     print ("Processing Information...[can take upto 5 minutes]")
 
     get_machine_info()
-    check_azure_extension()
-    check_autoassessment_service()
     check_proxy_connectivity()
     MinTlsVersionCheck()
     check_https_connectivity()
     check_walinuxagent_service()
+    check_azure_extension()
+    check_autoassessment_service()
 
     try:
         print ("Checking access to linux repos")
@@ -1099,50 +1099,18 @@ def get_os_type():
     else:
         return OSType.NotAvailable
 
-def check_os_version():
-    rule_id = "Linux.OperatingSystemCheck"
-    rule_group_id = "prerequisites"
-    os_tuple = utils.get_linux_distribution()
-    os_version = os_tuple[0] + "-" + os_tuple[1]
-    supported_os_url = "https://learn.microsoft.com/en-us/azure/update-manager/support-matrix?tabs=public%2Cazurearc-os"
-
-    if re.search("Ubuntu-22.04 LTS", os_version, re.IGNORECASE) or \
-       re.search("Ubuntu-20.04", os_version, re.IGNORECASE) or \
-       re.search("Ubuntu-16.04", os_version, re.IGNORECASE) or \
-       re.search("Ubuntu-18.04", os_version, re.IGNORECASE) or \
-       re.search("SuSE-12", os_version, re.IGNORECASE) or \
-       re.search("SLES-12", os_version, re.IGNORECASE) or \
-       re.search("SLES-15", os_version, re.IGNORECASE) or \
-       re.search("SuSE-15", os_version, re.IGNORECASE) or \
-       re.search("rhel-7", os_version, re.IGNORECASE) or \
-       re.search("rhel-8", os_version, re.IGNORECASE) or \
-       re.search("rhel-9", os_version, re.IGNORECASE) or \
-       re.search("Amazon-2023", os_version, re.IGNORECASE) or \
-       re.search("Amazon-2.0", os_version, re.IGNORECASE) or \
-       re.search("centos-8", os_version, re.IGNORECASE) or \
-       re.search("centos-7", os_version, re.IGNORECASE) or \
-       re.search("Debian-10", os_version, re.IGNORECASE) or \
-       re.search("Debian-11", os_version, re.IGNORECASE) or \
-       re.search("Rocky-8", os_version, re.IGNORECASE) or \
-       re.search("Oracle-8", os_version, re.IGNORECASE) or \
-       re.search("Oracle-7", os_version, re.IGNORECASE) :
-        write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, "Operating system version is supported")
-    else:
-        log_msg = "Operating System version (%s) is not supported. Supported versions listed here: %s" % (os_version, supported_os_url)
-        write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, log_msg, supported_os_url)
-
 def check_proxy_connectivity():
-    rule_id = "Linux.ProxyCheck"
-    rule_group_id = "connectivity"
+    rule_id = "ProxySettingsCheck"
+    rule_group_id = "prerequisites"
 
     if os.environ.get("HTTP_PROXY") is None:
-        write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, "Machine has no proxy enabled.")
+        write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, "Proxy is not set")
     else:
-        write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, "Machine has proxy enabled.")
+        write_log_output(rule_id, rule_group_id, status_passedWithWarning, empty_failure_reason, "Proxy is set")
 
 def MinTlsVersionCheck():
-    rule_id = "Linux.TlsVersionCheck"
-    rule_group_id = "connectivity"
+    rule_id = "TlsVersionCheck"
+    rule_group_id = "prerequisites"
 
     context = ssl.create_default_context()
 
@@ -1167,8 +1135,8 @@ def MinTlsVersionCheck():
 def check_https_connectivity():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # sock.settimeout(10)
-    rule_id = "Linux.HttpsCheck"
-    rule_group_id = "connectivity"
+    rule_id = "HttpsConnectionCheck"
+    rule_group_id = "prerequisites"
     try:
         response = sock.connect_ex(("login.microsoftonline.com", 443))
 
@@ -1182,43 +1150,42 @@ def check_https_connectivity():
         sock.close()
 
 def check_azure_extension():
-    rule_id = "Linux.AzureExtension"
-    rule_group_id = "Extensions"
+    rule_id = "PatchExtensionCheck"
+    rule_group_id = "extensions"
     command = "ls /var/lib/waagent/ | grep Microsoft.CPlat.Core.LinuxPatchExtension"
     grep_output = os.popen(command).read()
     if( grep_output == ""):
-        write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, " LinuxPatchExtension is not installed")
+        write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, " Linux Patch Extension is not installed")
     else:
-        write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, " LinuxPatchExtension is installed: "+ str(grep_output))
+        write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, " Linux Patch Extension is installed: "+ str(grep_output))
 
 def check_autoassessment_service():
-    rule_id = "Linux.AutoAssessment"
-    rule_group_id = "extensions"
+    rule_group_id = "machinesettings"
     rule_name = "MsftLinuxPatchAutoAssess Check"
     command = "sudo systemctl is-active MsftLinuxPatchAutoAssess.timer"
     grep_output = os.popen(command).read()
     if "active" not in str(grep_output):
-        write_log_output("Linux.AutoAssessment.timer", rule_group_id, status_failed, empty_failure_reason," MsftLinuxPatchAutoAssess.timer is not active")
+        write_log_output("AutoAssessmentTimerCheck", rule_group_id, status_failed, empty_failure_reason," MsftLinuxPatchAutoAssess.timer is not active")
     else:
-        write_log_output("Linux.AutoAssessment.timer",  rule_group_id, status_passed , empty_failure_reason, " MsftLinuxPatchAutoAssess.timer is active")
+        write_log_output("AutoAssessmentTimerCheck",  rule_group_id, status_passed , empty_failure_reason, " MsftLinuxPatchAutoAssess.timer is active")
 
     command = "sudo systemctl is-enabled MsftLinuxPatchAutoAssess.service"
     grep_output = os.popen(command).read()
     if "enabled" not in str(grep_output):
-        write_log_output("Linux.AutoAssessment.service", rule_group_id, status_failed, empty_failure_reason," MsftLinuxPatchAutoAssess.service is not enabled")
+        write_log_output("AutoAssessmentServiceCheck", rule_group_id, status_failed, empty_failure_reason," MsftLinuxPatchAutoAssess.service is not enabled")
     else:
-        write_log_output("Linux.AutoAssessment.service", rule_group_id, status_passed , empty_failure_reason, " MsftLinuxPatchAutoAssess.service is enabled")
+        write_log_output("AutoAssessmentServiceCheck", rule_group_id, status_passed , empty_failure_reason, " MsftLinuxPatchAutoAssess.service is enabled")
     return 0
 
 def check_walinuxagent_service():
-    rule_id = "Linux.WALinuxAgent"
-    rule_group_id = "SystemServices"
+    rule_id = "LinuxAzureGuestAgentServiceCheck"
+    rule_group_id = "systemservices"
     command = "sudo systemctl is-active walinuxagent"
     grep_output = os.popen(command).read()
     if "active" not in str(grep_output):
-        write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, "walinuxagent is not active")
+        write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, "Linux Azure Guest agent service is running")
     else:
-        write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, "walinuxagent is active")
+        write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, "Linux Azure Guest agent service is not running")
 
 def is_process_running(process_name, search_criteria, output_name):
     command = "ps aux | grep %s | grep -v grep" % (process_name)
