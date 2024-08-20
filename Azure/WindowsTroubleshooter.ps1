@@ -540,7 +540,7 @@ function Validate-MUIsEnabled {
 }
 
 $validationResults = @()
-$validationResults += Validate-NetFrameworkInstalled
+$validationResults += Validate-DotNetFrameworkInstalled
 $validationResults += Validate-TLSVersion
 $validationResults += Validate-HttpsConnection
 $validationResults += Validate-ProxySettings
