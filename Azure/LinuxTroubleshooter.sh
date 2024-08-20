@@ -995,7 +995,7 @@ def check_access_to_linux_repos():
     global CheckResultMessageArguments_RepoCheck
     global CheckResultMessage_RepoCheck
     rule_id = "ReposAccessCheck"
-    rule_group_id = "machineSettings"
+    rule_group_id = "machinesettings"
     rule_name = "Repository access check"
 
     repoMgr = RepositoryManager()
