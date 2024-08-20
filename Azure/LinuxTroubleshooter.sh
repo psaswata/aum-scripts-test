@@ -1179,7 +1179,7 @@ def check_autoassessment_service():
 
 def check_walinuxagent_service():
     rule_id = "LinuxAzureGuestAgentServiceCheck"
-    rule_group_id = "systemservices"
+    rule_group_id = "guestagentservices"
     command = "sudo systemctl is-active walinuxagent"
     grep_output = os.popen(command).read()
     if "active" not in str(grep_output):
