@@ -1148,10 +1148,10 @@ def main(output_path=None, return_json_output="False"):
     get_machine_info()
     check_os_version()
     check_proxy_connectivity()
-    MinTlsVersionCheck()
+    check_min_tls_version()
     check_https_connectivity()
-    check_Arc_required_endpoints()
-    #check_azcmagentANDservices()
+    check_azure_arc_required_endpoints()
+    check_azure_arc_services()
     check_autoassessment_service()
 
     try:
@@ -1255,7 +1255,7 @@ def check_proxy_connectivity():
     else:
         write_log_output(rule_id, rule_group_id, status_passedWithWarning, empty_failure_reason, "Proxy is set")
 
-def MinTlsVersionCheck():
+def check_min_tls_version():
     rule_id = "TlsVersionCheck"
     rule_group_id = "prerequisites"
     
@@ -1317,30 +1317,17 @@ def check_autoassessment_service():
         write_log_output("AutoAssessmentServiceCheck", rule_group_id, status_passed , empty_failure_reason, " MsftLinuxPatchAutoAssess.service is enabled")
     return 0
 
-def check_azcmagentANDservices():
-    rule_id = ""
+def check_azure_arc_services():
+    rule_id = "HimdsServiceCheck"
     rule_group_id = "arcagentservices"
-    rule_name = "Agent and services check"
-    def check_service_state(service_name):
-        command = "azcmagent show | grep %s" % (service_name)
-        grep_output = os.popen(command).read()
-        rule_id = "Linux." + service_name
-        if "active" not in str(grep_output):
-            write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, str(service_name) + " service is not active")
-        else:
-            write_log_output(rule_id, rule_group_id, status_passed , empty_failure_reason, str(service_name) + " service is active")
-
-    FNULL = open(os.devnull, "w")
-    if subprocess.call(["which", "azcmagent"], stdout=FNULL, stderr=FNULL) == 0:
-        #check_service_state("extd")
-        #check_service_state("gcad")
-        check_service_state("himdsd")
-        command = "azcmagent show"
-        grep_output = os.popen(command).read()
-        write_log_output("ArcAgentStatusCheck", rule_group_id, status_passed, empty_failure_reason, str(grep_output))
+    rule_name = "Himds service check"
+    service_name = "himds"
+    command = "azcmagent show | grep %s" % (service_name)
+    grep_output = os.popen(command).read()
+    if "active" not in str(grep_output):
+        write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, str(service_name) + " is not running")
     else:
-        write_log_output("ArcAgentStatusCheck", rule_group_id, status_failed , empty_failure_reason, "azcmagent is not present on the machine")
-    FNULL.close()
+        write_log_output(rule_id, rule_group_id, status_passed , empty_failure_reason, str(service_name) + " is running")
 
 def is_process_running(process_name, search_criteria, output_name):
     command = "ps aux | grep %s | grep -v grep" % (process_name)
@@ -1358,7 +1345,7 @@ def check_tcp_connection(url):
     except socket.error as e:
         return 0
     
-def check_Arc_required_endpoints():
+def check_azure_arc_required_endpoints():
     rule_id = "ArcRequiredEndpointsCheck"
     rule_group_id = "connectivity"
     rule_name = "Azure arc required endpoints check"

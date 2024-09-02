@@ -1037,7 +1037,7 @@ def main(output_path=None, return_json_output="False"):
 
     get_machine_info()
     check_proxy_connectivity()
-    MinTlsVersionCheck()
+    check_min_tls_version()
     check_https_connectivity()
     check_walinuxagent_service()
     check_azure_extension()
@@ -1108,7 +1108,7 @@ def check_proxy_connectivity():
     else:
         write_log_output(rule_id, rule_group_id, status_passedWithWarning, empty_failure_reason, "Proxy is set")
 
-def MinTlsVersionCheck():
+def check_min_tls_version():
     rule_id = "TlsVersionCheck"
     rule_group_id = "prerequisites"
 
