@@ -300,7 +300,6 @@ function Validate-WindowsUpdateEndpointConnectivity {
             "dl.delivery.mp.microsoft.com",
             "download.windowsupdate.com",
             "download.microsoft.com",
-            "wustat.windows.com",
             "ntservicepack.microsoft.com",
             "go.microsoft.com",
             "dl.delivery.mp.microsoft.com"
@@ -394,18 +393,9 @@ function Validate-WSUSServerConfigured {
     $wsusServerConfigured = getRegValue ($automaticUpdatePath) "WUServer"
 
     if ( $null -ne $wsusServerConfigured ) {
-
-        $wsusUri = [Uri]$wsusServerConfigured
-        $testResult = Test-NetConnection -ComputerName $wsusUri.Host -Port $wsusUri.Port 
-        if ($testResult.TcpTestSucceeded) {
-           $result = "PassedWithWarning"
-           $resultMessage = "Windows Updates are downloading from a configured WSUS Server $wsusServerConfigured."
-           $resultMessageArguments = @() + $wsusServerConfigured
-        } else {
-           $result = "Failed"
-           $resultMessage = "WSUS Server is not accessible $wsusServerConfigured."
-           $resultMessageArguments = @() + $wsusServerConfigured
-        }
+        $result = "PassedWithWarning"
+        $resultMessage = "Windows Updates are downloading from a configured WSUS Server $wsusServerConfigured."
+        $resultMessageArguments = @() + $wsusServerConfigured
     }
     else {
         $result = "Passed"
