@@ -387,7 +387,7 @@ function Validate-WSUSServerConfigured {
     $ruleDescription = "Increase awareness on WSUS configured on the server."
     $result = $null
     $resultMessage = $null
-    $ruleGroupId = "machineSettings"
+    $ruleGroupId = "machinesettings"
     $ruleGroupName = "Machine Update Settings Checks"
 
     $automaticUpdatePath = "HKLM:\\Software\\Policies\\Microsoft\\Windows\\WindowsUpdate"

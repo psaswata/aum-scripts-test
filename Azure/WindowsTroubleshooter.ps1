@@ -342,7 +342,7 @@ function Validate-AlwaysAutoRebootEnabled {
     $ruleDescription = "Automatic reboot should not be enabled as it forces a reboot irrespective of update configuration."
     $result = $null
     $resultMessage = $null
-    $ruleGroupId = "machineSettings"
+    $ruleGroupId = "machinesettings"
     $ruleGroupName = "Machine Update Settings Checks"
 
     $automaticUpdatePath = "HKLM:\\Software\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU"
@@ -369,7 +369,7 @@ function Validate-AutomaticUpdateEnabled {
     $ruleDescription = "Automatic Update should not be enabled on the machine."
     $result = $null
     $resultMessage = $null
-    $ruleGroupId = "machineSettings"
+    $ruleGroupId = "machinesettings"
     $ruleGroupName = "Machine Update Settings Checks"
 
     $automaticUpdatePath = "HKLM:\\Software\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU"
@@ -395,7 +395,7 @@ function Validate-WSUSServerConfigured {
     $ruleDescription = "Increase awareness on WSUS configured on the server."
     $result = $null
     $resultMessage = $null
-    $ruleGroupId = "machineSettings"
+    $ruleGroupId = "machinesettings"
     $ruleGroupName = "Machine Update Settings Checks"
 
     $automaticUpdatePath = "HKLM:\\Software\\Policies\\Microsoft\\Windows\\WindowsUpdate"
