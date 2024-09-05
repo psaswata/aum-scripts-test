@@ -766,7 +766,6 @@ class Utility(object):
         self.standard_datetime_format = "%Y-%m-%dT%H:%M:%S"
         self.touch_cmd = "sudo touch "
         self.chown_cmd = "sudo chown "
-        self.omsagentusergroup = "omsagent:omiusers "
         self.chmod_cmd = "sudo chmod "
         self.permissions = "u=rw,g=rw,o=r "
 
@@ -857,16 +856,11 @@ output = []
 CheckResultMessage_RepoCheck = ""
 CheckResultMessageArguments_RepoCheck = []
 
-oms_admin_conf_path = "/etc/opt/microsoft/omsagent/conf/omsadmin.conf"
-oms_agent_dir = "/var/opt/microsoft/omsagent"
-oms_agent_log = "/var/opt/microsoft/omsagent/log/omsagent.log"
-current_mof = "/etc/opt/omi/conf/omsconfig/configuration/Current.mof"
 status_passed = "Passed"
 status_failed = "Failed"
 status_debug = "Debug"
 status_passedwithwarning = "PassedWithWarning"
 empty_failure_reason = ""
-#workspace = ""
 
 class RuleInfo:
     def __init__(self, rule_id, rule_group_id, status, result_msg_id):

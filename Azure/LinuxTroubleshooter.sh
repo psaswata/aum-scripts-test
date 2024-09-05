@@ -639,7 +639,6 @@ class Utility(object):
         self.standard_datetime_format = "%Y-%m-%dT%H:%M:%S"
         self.touch_cmd = "sudo touch"
         self.chown_cmd = "sudo chown"
-        self.omsagentusergroup = "omsagent:omiusers"
         self.chmod_cmd = "sudo chmod"
         self.permissions = "u=rw,g=rw,o=r"
 
@@ -730,10 +729,6 @@ CheckResultMessageArguments_RepoCheck = []
 
 scriptDebugLogFilePath = "/var/lib/waagent/run-command/download"
 
-oms_admin_conf_path = "/etc/opt/microsoft/omsagent/conf/omsadmin.conf"
-oms_agent_dir = "/var/opt/microsoft/omsagent"
-oms_agent_log = "/var/opt/microsoft/omsagent/log/omsagent.log"
-current_mof = "/etc/opt/omi/conf/omsconfig/configuration/Current.mof"
 status_passed = "Passed"
 status_failed = "Failed"
 status_debug = "Debug"
