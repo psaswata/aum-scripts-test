@@ -82,8 +82,8 @@ function Validate-DotNetFrameworkInstalled {
     $netFrameworkDownloadLink = "https://dotnet.microsoft.com/en-us/download/dotnet-framework"
 
     $ruleId = "DotNetFrameworkInstalledCheck"
-    $ruleName = "Dot Net Framework installed check"
-    $ruleDescription = ".NET Framework version 4.5 or higher is required."
+    $ruleName = "Dot Net Framework installation check"
+    $ruleDescription = ".NET Framework version 4.0 or higher is required."
     $result = $null
     $resultMessage = $null
     $ruleGroupId = "prerequisites"
@@ -96,15 +96,15 @@ function Validate-DotNetFrameworkInstalled {
         $versionCheck = (Get-ChildItem $dotNetFullRegistryPath) | Get-ItemPropertyValue -Name Release | ForEach-Object { $_ -ge 378389 }
         if($versionCheck -eq $true) {
             $result = "Passed"
-            $resultMessage = ".NET Framework version 4.5+ is found."
+            $resultMessage = ".NET Framework version 4.0+ is found"
         } else {
             $result = "Failed"
-            $resultMessage = ".NET Framework version 4.5 or higher is required: $netFrameworkDownloadLink."
+            $resultMessage = ".NET Framework version 4.0 or higher is required: $netFrameworkDownloadLink."
             $resultMessageArguments += $netFrameworkDownloadLink
         }
     } else{
         $result = "Failed"
-        $resultMessage = ".NET Framework version 4.5 or higher is required: $netFrameworkDownloadLink."
+        $resultMessage = ".NET Framework version 4.0 or higher is required: $netFrameworkDownloadLink."
         $resultMessageArguments += $netFrameworkDownloadLink
     }
     $resultMessageId = "$ruleId.$result"
@@ -136,7 +136,7 @@ function Validate-TLSVersion {
     if ($validationResults[0].CheckResult -ne "Passed" -and [System.Environment]::OSVersion.Version -ge [System.Version]"6.0.6001") {
         $result = "Failed"
         $resultMessageId = "$ruleId.$result"
-        $resultMessage = "TLS 1.2 is not enabled by default on the Operating System. Follow the instructions to enable it: https://support.microsoft.com/help/4019276/update-to-add-support-for-tls-1-1-and-tls-1-2-in-windows."
+        $resultMessage = "Enable TLS 1.2 on your operating system. Follow the instructions to enable it: https://support.microsoft.com/help/4019276/update-to-add-support-for-tls-1-1-and-tls-1-2-in-windows."
     } elseif([System.Environment]::OSVersion.Version -ge [System.Version]"6.1.7601" -and [System.Environment]::OSVersion.Version -le [System.Version]"6.1.8400") {
         if($clientNotDisabled -and $serverNotDisabled -and !($serverNotEnabled -and $clientNotEnabled)) {
             $result = "Passed"
@@ -146,25 +146,25 @@ function Validate-TLSVersion {
             $result = "Failed"
             $reason = "NotExplicitlyEnabled"
             $resultMessageId = "$ruleId.$result.$reason"
-            $resultMessage = "TLS 1.2 is not enabled by default on the Operating System. Follow the instructions to enable it: https://docs.microsoft.com/windows-server/security/tls/tls-registry-settings#tls-12."
+            $resultMessage = "Enable TLS 1.2 on your operating system. Follow the instructions to enable it: https://docs.microsoft.com/windows-server/security/tls/tls-registry-settings#tls-12."
         }
     } elseif([System.Environment]::OSVersion.Version -ge [System.Version]"6.2.9200") {
         if($clientDisabled -or $serverDisabled -or $serverNotEnabled -or $clientNotEnabled) {
             $result = "Failed"
             $reason = "ExplicitlyDisabled"
             $resultMessageId = "$ruleId.$result.$reason"
-            $resultMessage = "TLS 1.2 is supported by the Operating System, but currently disabled. Follow the instructions to re-enable: https://docs.microsoft.com/windows-server/security/tls/tls-registry-settings#tls-12."
+            $resultMessage = "TLS 1.2 is available on the Operating System, but currently disabled. Follow the instructions to re-enable: https://docs.microsoft.com/windows-server/security/tls/tls-registry-settings#tls-12."
         } else {
             $result = "Passed"
             $reason = "EnabledByDefault"
             $resultMessageId = "$ruleId.$result.$reason"
-            $resultMessage = "TLS 1.2 is enabled by default on the Operating System."
+            $resultMessage = "TLS 1.2 is enabled on the Operating System."
         }
     } else {
         $result = "Failed"
         $reason = "NoDefaultSupport"
         $resultMessageId = "$ruleId.$result.$reason"
-        $resultMessage = "Your OS does not support TLS 1.2 by default."
+        $resultMessage = "Your OS does not support TLS 1.2."
     }
     return New-RuleCheckResult $ruleId $ruleName $ruleDescription $result $resultMessage $ruleGroupId $ruleGroupName $resultMessageId
 }
@@ -182,10 +182,10 @@ function Validate-WindowsPatchExtension {
 
     if (Test-Path -Path $extensionPath -PathType Container) {
         $result = "Passed"
-        $resultMessage = "WindowsPatchExtension is installed on the machine."
+        $resultMessage = "Windows Patch extension is installed on the machine."
     } else {
         $result = "Failed"
-        $resultMessage = "WindowsPatchExtension is not installed on the machine."
+        $resultMessage = "Windows Patch extension is not installed on the machine."
     }
     $resultMessageId = "$ruleId.$result"
     return New-RuleCheckResult $ruleId $ruleName $ruleDescription $result $resultMessage $ruleGroupId $ruleGroupName $resultMessageId $resultMessageArguments
@@ -228,7 +228,7 @@ function Validate-AzureGuestAgentServices {
         @{
             "service" = "WindowsAzureGuestAgent";
             "ruleId" = "WindowsAzureGuestAgentServiceCheck";
-            "ruleName" = "Windows Azure Guest agent service must be running"
+            "ruleName" = "Windows Azure guest agent service must be running"
         }
     )
     
@@ -241,7 +241,7 @@ function Validate-AzureGuestAgentServices {
 
 function Validate-WireServerConnectivity{
     $ruleId = "WireServerConnectivityCheck"
-    $ruleName = "Wire server connectivity check"
+    $ruleName = "Wire Server connectivity check"
     $ruleDescription = "Wire Server must be reachable"
     $result = $null
     $resultMessage = $null
@@ -337,7 +337,7 @@ function Validate-WindowsUpdateEndpointConnectivity {
 
 function Validate-AlwaysAutoRebootEnabled {
     $ruleId = "AlwaysAutoRebootCheck"
-    $ruleName = "Always auto reboot check"
+    $ruleName = "Automatic reboot check"
     $ruleDescription = "Automatic reboot should not be enabled as it forces a reboot irrespective of update configuration."
     $result = $null
     $resultMessage = $null
@@ -351,11 +351,11 @@ function Validate-AlwaysAutoRebootEnabled {
 
     if (  $rebootEnabledBySchedule -or $rebootEnabledByDuration ) {
         $result = "PassedWithWarning"
-        $resultMessage = "Windows Update reboot registry keys are set to automatic reboot. This can cause unexpected reboots when installing updates."
+        $resultMessage = "Windows Update reboot registry keys are set to automatic reboot and this can cause unexpected reboots on your machine when installing updates."
     }
     else {
         $result = "Passed"
-        $resultMessage = "Windows Update reboot registry keys are not set to automatically reboot."
+        $resultMessage = "Windows Update reboot registry keys are not set to automatic reboot."
 
     }
     $resultMessageId = "$ruleId.$result"
@@ -364,7 +364,7 @@ function Validate-AlwaysAutoRebootEnabled {
 
 function Validate-AutomaticUpdateEnabled {
     $ruleId = "AutomaticUpdateCheck"
-    $ruleName = "Automatic Update check"
+    $ruleName = "Automatic update check"
     $ruleDescription = "Automatic Update should not be enabled on the machine."
     $result = $null
     $resultMessage = $null
@@ -427,7 +427,7 @@ function Validate-HttpsConnection {
     if($result -eq "Passed") {
         $resultMessage = "Machine is able to make https requests."
     } else {
-        $resultMessage = "Machine is not connected to internet or is unable to make https requests."
+        $resultMessage = "Machine is not able to make https requests."
     }
 
     $resultMessageId = "$ruleId.$result"
@@ -437,7 +437,7 @@ function Validate-HttpsConnection {
 
 function Validate-ProxySettings {
     $ruleId = "ProxySettingsCheck"
-    $ruleName = "Proxy settings"
+    $ruleName = "Proxy settings check"
     $ruleDescription = "Check if Proxy is enabled on the VM."
     $result = $null
     $resultMessage = ""
@@ -452,7 +452,7 @@ function Validate-ProxySettings {
         $resultMessage = "Proxy is not set."
     } else {
         $result = "PassedWithWarning"
-        $resultMessage = "Proxy is set."
+        $resultMessage = "Proxy is set. Ensure all required endpoints are reachable."
     }
 
     $resultMessageId = "$ruleId.$result"
@@ -464,7 +464,7 @@ function Validate-WUIsEnabled {
     $windowsServiceDisplayName = "Windows Update"
 
     $ruleId = "WUServiceRunningCheck"
-    $ruleName = "Windows update service running check"
+    $ruleName = "Windows Update service must be running"
     $ruleDescription = "Windows update service must not be in the disabled state."
     $result = $null
     $resultMessage = $null
@@ -486,7 +486,7 @@ function Validate-WUIsEnabled {
 
 function Validate-MUIsEnabled {
     $ruleId = "MUEnableCheck"
-    $ruleName = "Microsoft update enabled check"
+    $ruleName = "Microsoft Update enabled check"
     $ruleDescription = "Microsoft Update must be running to receive updates for Microsoft Products."
     $result = $null
     $reason = ""
@@ -512,12 +512,12 @@ function Validate-MUIsEnabled {
 
         if ($registeredWithAU -and $registeredWithAU.RegisteredWithAU -eq 1) {
             $result = "Passed"
-            $resultMessage = "Microsoft Update is registered with Windows Update Agent and enabled."
+            $resultMessage = "Microsoft Update is registered with Windows Update and enabled."
             $resultMessageId = "$ruleId.$result"
         } else {
             $result = "PassedWithWarning"
             $reason = "MURegisteredButDisabled"
-            $resultMessage = "Microsoft Update is registered with Windows Update Agent but disabled. Please enable Microsoft Update to receive updates for Microsoft Products."
+            $resultMessage = "Microsoft Update is registered with Windows Update but disabled. Please enable Microsoft Update to receive updates for Microsoft Products."
             $resultMessageId = "$ruleId.$result.$reason"
         }
     } else {

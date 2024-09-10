@@ -1136,9 +1136,9 @@ def check_https_connectivity():
         response = sock.connect_ex(("login.microsoftonline.com", 443))
 
         if response == 0:
-            write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, "Machine is connected to internet and can make https requests.")
+            write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, "Machine is able to make https requests.")
         else:
-            write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, "Machine is not connected to internet or cannot make https requests.")
+            write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, "Machine is not able to make https requests.")
     except socket.error as e:
         write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, "Socket error occurred while checking https connectivity.")
     finally:
@@ -1150,26 +1150,26 @@ def check_azure_extension():
     command = "ls /var/lib/waagent/ | grep Microsoft.CPlat.Core.LinuxPatchExtension"
     grep_output = os.popen(command).read()
     if( grep_output == ""):
-        write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, " Linux Patch Extension is not installed")
+        write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, " Linux Patch extension is not installed")
     else:
-        write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, " Linux Patch Extension is installed: "+ str(grep_output))
+        write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, " Linux Patch extension is installed: "+ str(grep_output))
 
 def check_autoassessment_service():
     rule_group_id = "machinesettings"
-    rule_name = "MsftLinuxPatchAutoAssess Check"
+    rule_name = "MsftLinuxPatchAutoAssess check"
     command = "sudo systemctl is-active MsftLinuxPatchAutoAssess.timer"
     grep_output = os.popen(command).read()
     if "active" not in str(grep_output):
-        write_log_output("AutoAssessmentTimerCheck", rule_group_id, status_failed, empty_failure_reason," MsftLinuxPatchAutoAssess.timer is not active")
+        write_log_output("AutoAssessmentTimerCheck", rule_group_id, status_failed, empty_failure_reason," MsftLinuxPatchAutoAssess timer is not active")
     else:
-        write_log_output("AutoAssessmentTimerCheck",  rule_group_id, status_passed , empty_failure_reason, " MsftLinuxPatchAutoAssess.timer is active")
+        write_log_output("AutoAssessmentTimerCheck",  rule_group_id, status_passed , empty_failure_reason, " MsftLinuxPatchAutoAssess timer is active")
 
     command = "sudo systemctl is-enabled MsftLinuxPatchAutoAssess.service"
     grep_output = os.popen(command).read()
     if "enabled" not in str(grep_output):
-        write_log_output("AutoAssessmentServiceCheck", rule_group_id, status_failed, empty_failure_reason," MsftLinuxPatchAutoAssess.service is not enabled")
+        write_log_output("AutoAssessmentServiceCheck", rule_group_id, status_failed, empty_failure_reason," MsftLinuxPatchAutoAssess service is not enabled")
     else:
-        write_log_output("AutoAssessmentServiceCheck", rule_group_id, status_passed , empty_failure_reason, " MsftLinuxPatchAutoAssess.service is enabled")
+        write_log_output("AutoAssessmentServiceCheck", rule_group_id, status_passed , empty_failure_reason, " MsftLinuxPatchAutoAssess service is enabled")
     return 0
 
 def check_walinuxagent_service():
@@ -1178,9 +1178,9 @@ def check_walinuxagent_service():
     command = "sudo systemctl is-active walinuxagent"
     grep_output = os.popen(command).read()
     if "active" not in str(grep_output):
-        write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, "Linux Azure Guest agent service is running")
+        write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, "Linux Azure guest agent service is running")
     else:
-        write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, "Linux Azure Guest agent service is not running")
+        write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, "Linux Azure guest agent service is not running")
 
 def is_process_running(process_name, search_criteria, output_name):
     command = "ps aux | grep %s | grep -v grep" % (process_name)

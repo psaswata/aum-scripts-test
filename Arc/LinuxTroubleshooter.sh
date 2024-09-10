@@ -1100,7 +1100,7 @@ def check_access_to_linux_repos():
     global CheckResultMessage_RepoCheck
     rule_id = "ReposAccessCheck"
     rule_group_id = "machinesettings"
-    rule_name = "Repository access Check"
+    rule_name = "Repository access check"
 
     repoMgr = RepositoryManager()
     status = repoMgr.checkRule()
@@ -1236,7 +1236,7 @@ def check_os_version():
        re.search("Oracle-7", os_version, re.IGNORECASE) :
         write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, "Operating system version is supported")
     else:
-        log_msg = "Operating System version (%s) is not supported. Supported versions listed here: %s" % (os_version, supported_os_url)
+        log_msg = "Operating System version (%s) is unsupported. Supported versions listed here: %s" % (os_version, supported_os_url)
         write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, log_msg, supported_os_url)
  
 def check_proxy_connectivity():
@@ -1285,9 +1285,9 @@ def check_https_connectivity():
         response = sock.connect_ex(("login.microsoftonline.com", 443))
         
         if response == 0:
-            write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, "Machine is connected to internet and can make https requests.")
+            write_log_output(rule_id, rule_group_id, status_passed, empty_failure_reason, "Machine is able to make https requests.")
         else:
-            write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, "Machine is not connected to internet or cannot make https requests.")
+            write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, "Machine is not able to make https requests.")
     except socket.error as e:
         write_log_output(rule_id, rule_group_id, status_failed, empty_failure_reason, "Socket error occurred while checking https connectivity.")
     finally:
@@ -1295,26 +1295,26 @@ def check_https_connectivity():
 
 def check_autoassessment_service():
     rule_group_id = "machinesettings"
-    rule_name = "MsftLinuxPatchAutoAssess Check"
+    rule_name = "MsftLinuxPatchAutoAssess check"
     command = "sudo systemctl is-active MsftLinuxPatchAutoAssess.timer"
     grep_output = os.popen(command).read()
     if "active" not in str(grep_output):
-        write_log_output("AutoAssessmentTimerCheck", rule_group_id, status_failed, empty_failure_reason," MsftLinuxPatchAutoAssess.timer is not active")
+        write_log_output("AutoAssessmentTimerCheck", rule_group_id, status_failed, empty_failure_reason," MsftLinuxPatchAutoAssess timer is not active")
     else:
-        write_log_output("AutoAssessmentTimerCheck",  rule_group_id, status_passed , empty_failure_reason, " MsftLinuxPatchAutoAssess.timer is active")
+        write_log_output("AutoAssessmentTimerCheck",  rule_group_id, status_passed , empty_failure_reason, " MsftLinuxPatchAutoAssess timer is active")
 
     command = "sudo systemctl is-enabled MsftLinuxPatchAutoAssess.service"
     grep_output = os.popen(command).read()
     if "enabled" not in str(grep_output):
-        write_log_output("AutoAssessmentServiceCheck", rule_group_id, status_failed, empty_failure_reason," MsftLinuxPatchAutoAssess.service is not enabled")
+        write_log_output("AutoAssessmentServiceCheck", rule_group_id, status_failed, empty_failure_reason," MsftLinuxPatchAutoAssess service is not enabled")
     else:
-        write_log_output("AutoAssessmentServiceCheck", rule_group_id, status_passed , empty_failure_reason, " MsftLinuxPatchAutoAssess.service is enabled")
+        write_log_output("AutoAssessmentServiceCheck", rule_group_id, status_passed , empty_failure_reason, " MsftLinuxPatchAutoAssess service is enabled")
     return 0
 
 def check_azure_arc_services():
     rule_id = "HimdsServiceCheck"
     rule_group_id = "arcagentservices"
-    rule_name = "Himds service check"
+    rule_name = "Hybrid Instance Metadata service(himds) check"
     service_name = "himds"
     command = "azcmagent show | grep %s" % (service_name)
     grep_output = os.popen(command).read()
